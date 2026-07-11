@@ -1,0 +1,13 @@
+[
+  {"license": "MIT", "compatible_with_proprietary": true, "risk_level": "low"},
+  {"license": "Apache-2.0", "compatible_with_proprietary": true, "risk_level": "low"},
+  {"license": "BSD-3-Clause", "compatible_with_proprietary": true, "risk_level": "low"},
+  {"license": "ISC", "compatible_with_proprietary": true, "risk_level": "low"},
+  {"license": "LGPL-2.1", "compatible_with_proprietary": true, "risk_level": "medium"},
+  {"license": "LGPL-3.0", "compatible_with_proprietary": true, "risk_level": "medium"},
+  {"license": "MPL-2.0", "compatible_with_proprietary": true, "risk_level": "medium"},
+  {"license": "GPL-2.0", "compatible_with_proprietary": false, "risk_level": "critical"},
+  {"license": "GPL-3.0", "compatible_with_proprietary": false, "risk_level": "critical"},
+  {"license": "AGPL-3.0", "compatible_with_proprietary": false, "risk_level": "critical"},
+  {"license": "UNKNOWN", "compatible_with_proprietary": false, "risk_level": "high"}
+]

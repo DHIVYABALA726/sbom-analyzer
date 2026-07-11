@@ -1,0 +1,12 @@
+[
+  {"app_id": "APP-001", "name": "PaymentGateway", "criticality": "high", "distributed_externally": false},
+  {"app_id": "APP-002", "name": "CustomerPortal", "criticality": "high", "distributed_externally": true},
+  {"app_id": "APP-003", "name": "InventoryService", "criticality": "medium", "distributed_externally": false},
+  {"app_id": "APP-004", "name": "AuthHub", "criticality": "high", "distributed_externally": false},
+  {"app_id": "APP-005", "name": "ReportingEngine", "criticality": "medium", "distributed_externally": false},
+  {"app_id": "APP-006", "name": "MobileBackend", "criticality": "high", "distributed_externally": true},
+  {"app_id": "APP-007", "name": "NotificationService", "criticality": "low", "distributed_externally": false},
+  {"app_id": "APP-008", "name": "AnalyticsPipeline", "criticality": "medium", "distributed_externally": false},
+  {"app_id": "APP-009", "name": "OrderManagement", "criticality": "high", "distributed_externally": true},
+  {"app_id": "APP-010", "name": "InternalAdminTool", "criticality": "low", "distributed_externally": false}
+]
