@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card p-4">
+
+    <h2>⚖ License Compliance Dashboard</h2>
+
+    <p class="text-muted">
+        Monitor software license risks across applications and identify
+        dependencies that may violate enterprise compliance policies.
+    </p>
+
+    <div class="row mt-4">
+
+        <div class="col-md-4">
+            <div class="card text-center bg-danger text-white">
+                <div class="card-body">
+                    <h5>Compliance Risks</h5>
+                    <h2>{{ summary.total_risky }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h5>Compliant Dependencies</h5>
+                    <h2>{{ summary.total_clean }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card text-center bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Dependencies</h5>
+                    <h2>{{ summary.total_dependencies }}</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <hr class="my-4">
+
+    <h4>Compliance Recommendations</h4>
+
+    <table class="table table-bordered table-hover mt-3">
+
+        <thead class="table-dark">
+
+            <tr>
+                <th>Application</th>
+                <th>Library</th>
+                <th>Severity</th>
+                <th>Recommendation</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for dep in dependencies %}
+
+            <tr>
+
+                <td>{{ dep.app_name }}</td>
+
+                <td>{{ dep.library_name }}</td>
+
+                <td>
+
+                    {% if dep.severity == "CRITICAL" %}
+                        <span class="badge bg-danger">CRITICAL</span>
+
+                    {% elif dep.severity == "HIGH" %}
+                        <span class="badge bg-warning text-dark">HIGH</span>
+
+                    {% else %}
+                        <span class="badge bg-success">MEDIUM</span>
+
+                    {% endif %}
+
+                </td>
+
+                <td>
+
+                    Review dependency license before production deployment.
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

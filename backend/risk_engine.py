@@ -3,142 +3,404 @@ import csv
 import os
 from datetime import datetime
 
+
 # ============================================================
-# PART 1: LOAD ALL DATA FILES
+# LOAD SBOM DATA
 # ============================================================
+
 def load_data():
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(base_dir, "..", "data")
 
-    with open(os.path.join(data_dir, "applications.json"), "r") as f:
+    with open(os.path.join(data_dir, "applications.json")) as f:
         applications = json.load(f)
 
-    with open(os.path.join(data_dir, "vulnerability_db.json"), "r") as f:
-        vuln_db = json.load(f)
+    with open(os.path.join(data_dir, "vulnerability_db.json")) as f:
+        vulnerabilities = json.load(f)
 
-    with open(os.path.join(data_dir, "license_rules.json"), "r") as f:
-        license_rules = json.load(f)
+    with open(os.path.join(data_dir, "license_rules.json")) as f:
+        licenses = json.load(f)
 
-    with open(os.path.join(data_dir, "sbom_dependencies.csv"), "r", newline="") as f:
-        deps = list(csv.DictReader(f))
+    with open(os.path.join(data_dir, "sbom_dependencies.csv")) as f:
+        dependencies = list(csv.DictReader(f))
 
-    return applications, vuln_db, license_rules, deps
+
+    return (
+        applications,
+        vulnerabilities,
+        licenses,
+        dependencies
+    )
+
 
 
 # ============================================================
-# PART 2: CHECK IF A LIBRARY VERSION IS VULNERABLE
+# VERSION CHECK
 # ============================================================
-def version_is_affected(version, affected_expr):
+
+def version_is_affected(version, affected):
+
     try:
-        op = affected_expr[0]
-        target = tuple(int(x) for x in affected_expr[1:].split("."))
-        current = tuple(int(x) for x in version.split("."))
 
-        if op == "<":
+        operator = affected[0]
+
+        target = tuple(
+            int(x)
+            for x in affected[1:].split(".")
+        )
+
+        current = tuple(
+            int(x)
+            for x in version.split(".")
+        )
+
+
+        if operator == "<":
             return current < target
 
+
         return True
 
-    except Exception:
+
+    except:
+
         return True
+
+
 
 
 # ============================================================
-# PART 3: SCORE ONE DEPENDENCY
+# SEVERITY CALCULATION
 # ============================================================
-def evaluate_dependency(dep, apps_by_id, vuln_lookup, license_lookup):
-    app = apps_by_id[dep["app_id"]]
 
-    score = 0.0
+def get_severity(score):
+
+    if score >= 25:
+        return "CRITICAL"
+
+    elif score >= 15:
+        return "HIGH"
+
+    elif score >= 8:
+        return "MEDIUM"
+
+    else:
+        return "LOW"
+
+
+
+
+
+# ============================================================
+# SECURITY RECOMMENDATION
+# ============================================================
+
+def generate_recommendation(findings):
+
+    recommendations = []
+
+
+    for item in findings:
+
+        if item["type"] == "vulnerability":
+
+            recommendations.append(
+                "Upgrade dependency to patched version"
+            )
+
+
+        elif item["type"] == "license_conflict":
+
+            recommendations.append(
+                "Review open-source license compliance"
+            )
+
+
+        elif item["type"] == "unmaintained":
+
+            recommendations.append(
+                "Replace outdated dependency with maintained alternative"
+            )
+
+
+        elif item["type"] == "license_unknown":
+
+            recommendations.append(
+                "Verify dependency license information"
+            )
+
+
+    return list(set(recommendations))
+
+
+
+
+
+# ============================================================
+# ANALYZE DEPENDENCY
+# ============================================================
+
+def evaluate_dependency(
+        dep,
+        apps,
+        vuln_lookup,
+        license_lookup
+):
+
+
+    app = apps[dep["app_id"]]
+
+
+    risk_score = 0
+
     findings = []
 
-    # ---------------- Vulnerability Check ----------------
-    matched_cve = None
 
-    for v in vuln_lookup.get(dep["library_name"], []):
-        if version_is_affected(dep["version"], v["affected_versions"]):
-            if matched_cve is None or v["cvss_score"] > matched_cve["cvss_score"]:
-                matched_cve = v
 
-    if matched_cve:
-        score += matched_cve["cvss_score"]
+    # ---------------- Vulnerability ----------------
 
-        if not matched_cve["patch_available"]:
-            score += 1.5
 
-        if matched_cve.get("exploit_known_in_wild"):
-            score += 2.5
+    matched = None
+
+
+    for vuln in vuln_lookup.get(
+            dep["library_name"],
+            []
+    ):
+
+
+        if version_is_affected(
+                dep["version"],
+                vuln["affected_versions"]
+        ):
+
+            if (
+                matched is None
+                or vuln["cvss_score"]
+                >
+                matched["cvss_score"]
+            ):
+
+                matched = vuln
+
+
+
+    if matched:
+
+
+        risk_score += matched["cvss_score"]
+
+
+        if not matched["patch_available"]:
+            risk_score += 1.5
+
+
+        if matched.get(
+                "exploit_known_in_wild"
+        ):
+
+            risk_score += 2.5
+
+
 
         findings.append({
-            "type": "vulnerability",
-            "detail": f"{matched_cve['cve_id']} (CVSS {matched_cve['cvss_score']})"
+
+            "type":
+            "vulnerability",
+
+            "detail":
+            f"{matched['cve_id']} CVSS {matched['cvss_score']}"
+
         })
 
-    # ---------------- License Check ----------------
-    rule = license_lookup.get(dep["license"])
+
+
+
+
+    # ---------------- License ----------------
+
+
+    license = dep["license"]
+
+
+    rule = license_lookup.get(
+        license
+    )
+
 
     if (
         rule
-        and not rule["compatible_with_proprietary"]
-        and app["distributed_externally"] is True
+        and
+        not rule["compatible_with_proprietary"]
+        and
+        app["distributed_externally"]
     ):
-        score += 8.0
+
+
+        risk_score += 8
+
 
         findings.append({
-            "type": "license_conflict",
-            "detail": f"{dep['license']} not safe for external distribution"
+
+            "type":
+            "license_conflict",
+
+            "detail":
+            f"{license} compliance risk"
+
         })
 
-    elif dep["license"] == "UNKNOWN":
-        score += 5.0
+
+
+    elif license == "UNKNOWN":
+
+
+        risk_score += 5
+
 
         findings.append({
-            "type": "license_unknown",
-            "detail": "No license declared"
+
+            "type":
+            "license_unknown",
+
+            "detail":
+            "License information unavailable"
+
         })
 
-    # ---------------- Maintenance Check ----------------
+
+
+
+
+
+    # ---------------- Maintenance ----------------
+
+
+    last_update = datetime.strptime(
+        dep["last_updated"],
+        "%Y-%m-%d"
+    )
+
+
     days_old = (
         datetime.today()
-        - datetime.strptime(dep["last_updated"], "%Y-%m-%d")
+        -
+        last_update
     ).days
 
+
+
     if days_old > 730:
-        score += 3.0
+
+
+        risk_score += 3
+
 
         findings.append({
-            "type": "unmaintained",
-            "detail": f"No updates in {days_old} days"
+
+            "type":
+            "unmaintained",
+
+            "detail":
+            f"No update for {days_old} days"
+
         })
 
-    # ---------------- Business Criticality ----------------
-    multiplier = {
-        "high": 1.3,
-        "medium": 1.0,
-        "low": 0.8
-    }.get(app["criticality"], 1.0)
 
-    final_score = round(score * multiplier, 2)
+
+
+
+    # ---------------- Business Criticality ----------------
+
+
+    multiplier = {
+
+        "high":1.3,
+
+        "medium":1,
+
+        "low":0.8
+
+    }.get(
+        app["criticality"],
+        1
+    )
+
+
+
+    final_score = round(
+        risk_score * multiplier,
+        2
+    )
+
+
+
+    severity = get_severity(
+        final_score
+    )
+
+
 
     return {
-        "dependency_id": dep["dependency_id"],
-        "app_id": dep["app_id"],
-        "app_name": app["name"],
-        "library_name": dep["library_name"],
-        "version": dep["version"],
-        "risk_score": final_score,
-        "findings": findings,
-        "status": "risky" if findings else "clean"
+
+
+        "app_name":
+        app["name"],
+
+
+        "library_name":
+        dep["library_name"],
+
+
+        "version":
+        dep["version"],
+
+
+        "risk_score":
+        final_score,
+
+
+        "severity":
+        severity,
+
+
+        "findings":
+        findings,
+
+
+        "recommendations":
+        generate_recommendation(
+            findings
+        ),
+
+
+        "status":
+        "risky"
+        if findings
+        else
+        "clean"
+
     }
 
 
-# ============================================================
-# PART 4: MAIN FUNCTION
-# ============================================================
-def get_ranked_report(top_n=20):
-    applications, vuln_db, license_rules, deps = load_data()
 
-    apps_by_id = {
+
+
+# ============================================================
+# GENERATE REPORT
+# ============================================================
+
+
+# ============================================================
+# GENERATE REPORT
+# ============================================================
+
+def get_ranked_report(top_n=20):
+
+    applications, vuln_db, licenses, deps = load_data()
+
+    apps = {
         a["app_id"]: a
         for a in applications
     }
@@ -146,59 +408,141 @@ def get_ranked_report(top_n=20):
     vuln_lookup = {}
 
     for v in vuln_db:
-        vuln_lookup.setdefault(v["library_name"], []).append(v)
+        vuln_lookup.setdefault(
+            v["library_name"],
+            []
+        ).append(v)
 
     license_lookup = {
-        r["license"]: r
-        for r in license_rules
+        l["license"]: l
+        for l in licenses
     }
 
-    all_findings = [
-        evaluate_dependency(
-            d,
-            apps_by_id,
-            vuln_lookup,
-            license_lookup
+    results = []
+
+    for dep in deps:
+
+        results.append(
+
+            evaluate_dependency(
+                dep,
+                apps,
+                vuln_lookup,
+                license_lookup
+            )
+
         )
-        for d in deps
-    ]
 
     risky = [
-        f for f in all_findings
-        if f["status"] == "risky"
+
+        r
+
+        for r in results
+
+        if r["status"] == "risky"
+
     ]
 
     risky.sort(
+
         key=lambda x: x["risk_score"],
+
         reverse=True
+
     )
 
+    # ===========================================
+    # APPLICATION RISK RANKING
+    # ===========================================
+
+    application_scores = {}
+
+    for item in risky:
+
+        app = item["app_name"]
+
+        application_scores.setdefault(app, 0)
+
+        application_scores[app] += item["risk_score"]
+
+    application_ranking = []
+
+    for app, score in application_scores.items():
+
+        application_ranking.append({
+
+            "app_name": app,
+
+            "total_risk": round(score, 2)
+
+        })
+
+    application_ranking.sort(
+
+        key=lambda x: x["total_risk"],
+
+        reverse=True
+
+    )
+
+    # ===========================================
+    # FINAL REPORT
+    # ===========================================
+
     return {
+
         "top_risky_dependencies": risky[:top_n],
+
+        "application_ranking": application_ranking,
+
         "summary": {
+
             "total_applications": len(applications),
-            "total_dependencies": len(all_findings),
+
+            "total_dependencies": len(results),
+
             "total_risky": len(risky),
-            "total_clean": len(all_findings) - len(risky)
+
+            "total_clean": len(results) - len(risky)
+
         }
+
     }
 
 
 # ============================================================
-# PART 5: TEST
-# ============================================================
-if __name__ == "__main__":
-    report = get_ranked_report()
+# TEST
 
-    print("Summary:")
+
+
+
+
+# ============================================================
+# TEST
+# ============================================================
+
+
+if __name__=="__main__":
+
+
+    report=get_ranked_report()
+
+
     print(report["summary"])
 
-    print("\nTop 5 Riskiest Dependencies:\n")
 
-    for r in report["top_risky_dependencies"][:5]:
+
+    for item in report["top_risky_dependencies"][:5]:
+
+
         print(
-            f"{r['app_name']:20s}"
-            f"{r['library_name']:20s}"
-            f"Score={r['risk_score']:6.2f}"
-            f" {[f['type'] for f in r['findings']]}"
+
+            item["app_name"],
+
+            item["library_name"],
+
+            item["risk_score"],
+
+            item["severity"]
+
         )
