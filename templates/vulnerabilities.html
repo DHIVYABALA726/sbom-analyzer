@@ -9,7 +9,59 @@
     <p class="text-muted">
         View vulnerable software components detected by the SBOM Risk Engine.
     </p>
+    <div class="row mb-4">
 
+    <div class="col-md-4">
+
+        <div class="card bg-danger text-white">
+
+            <div class="card-body text-center">
+
+                <h5>🔴 Critical Vulnerabilities</h5>
+
+                <h2>{{critical_count}}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card bg-warning text-dark">
+
+            <div class="card-body text-center">
+
+                <h5>🟠 High Vulnerabilities</h5>
+
+                <h2>{{high_count}}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card bg-info text-dark">
+
+            <div class="card-body text-center">
+
+                <h5>🟡 Medium Vulnerabilities</h5>
+
+                <h2>{{medium_count}}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
     <input
         type="text"
         id="searchInput"

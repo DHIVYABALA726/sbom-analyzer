@@ -9,18 +9,52 @@
 .card{
 
     border:none;
-    border-radius:15px;
-    box-shadow:0px 4px 12px rgba(0,0,0,0.1);
+
+    border-radius:18px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+    transition:all .3s ease;
 
 }
 
+.card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 35px rgba(0,0,0,.15);
+
+}
+.fade-up{
+
+    animation:fadeUp .8s ease;
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(25px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
 
 .chart-container{
-
-    width:350px;
-    height:350px;
+    width:220px;
+    height:220px;
     margin:auto;
-
 }
 
 
@@ -36,23 +70,49 @@
     font-size:14px;
 
 }
+.table tbody tr{
+
+    transition:all .3s ease;
+
+}
+
+.table tbody tr:hover{
+
+    background:#f8f9fa;
+
+    transform:scale(1.01);
+
+}
+
+.risk-bar{
+
+    height:8px;
+
+    border-radius:10px;
+
+}
 
 </style>
 
 
+<div class="text-center mb-5">
 
-<h1 class="text-center mb-5">
+    <h1 class="fw-bold display-5">
+        🛡 Software Supply Chain Risk Scorer
+    </h1>
 
-🚀 Software Supply Chain Risk Scorer
+    <p class="text-muted fs-5">
+        Enterprise SBOM Analysis & Software Supply Chain Security Dashboard
+    </p>
 
-</h1>
+</div>
 
 
 
 <!-- Summary Cards -->
 
 
-<div class="row">
+<div class="row fade-up">
 
 
 <div class="col-md-3">
@@ -142,7 +202,7 @@
 <!-- Risk Chart -->
 
 
-<div class="card p-4">
+<div class="card p-4 mb-4">
 
 
 <h3 class="text-center">
@@ -182,8 +242,7 @@ Risk Distribution
 </h3>
 
 
-<table class="table table-bordered mt-3">
-
+<table class="table table-hover table-bordered mt-3">
 
 <tr class="table-dark">
 
@@ -191,32 +250,24 @@ Risk Distribution
 
 <th>Application</th>
 
-<th>Total Risk Score</th>
+<th>Risk Score</th>
 
-<th>Severity</th>
-
+<th>Risk Level</th>
 
 </tr>
 
 
-
 {% for app in applications %}
-
 
 <tr>
 
-
 <td>
-
 {{loop.index}}
-
 </td>
 
 
 <td>
-
-{{app.name}}
-
+<strong>{{app.name}}</strong>
 </td>
 
 
@@ -224,28 +275,55 @@ Risk Distribution
 
 {{app.score}}
 
+<div class="progress mt-2" style="height:8px;">
+
+<div class="progress-bar bg-danger risk-bar"
+style="width: {{ (app.score / 300) * 100 }}%;">
+</div>
+
+</div>
+
 </td>
 
 
 <td>
 
+{% if app.severity == "CRITICAL" %}
 
 <span class="badge bg-danger">
-
-{{app.severity}}
-
+🔴 CRITICAL
 </span>
 
+
+{% elif app.severity == "HIGH" %}
+
+<span class="badge bg-warning text-dark">
+🟠 HIGH
+</span>
+
+
+{% elif app.severity == "MEDIUM" %}
+
+<span class="badge bg-info text-dark">
+🟡 MEDIUM
+</span>
+
+
+{% else %}
+
+<span class="badge bg-success">
+🟢 LOW
+</span>
+
+
+{% endif %}
 
 </td>
 
 
 </tr>
 
-
 {% endfor %}
-
-
 
 </table>
 
@@ -273,11 +351,9 @@ Risk Distribution
 </h3>
 
 
-<table class="table table-bordered table-hover mt-3">
-
+<table class="table table-hover table-bordered mt-3">
 
 <tr class="table-dark">
-
 
 <th>Application</th>
 
@@ -291,45 +367,95 @@ Risk Distribution
 
 <th>Status</th>
 
-
 </tr>
-
 
 
 {% for dep in dependencies %}
 
-
 <tr>
 
 
-<td>{{dep.app_name}}</td>
+<td>
+<strong>{{dep.app_name}}</strong>
+</td>
 
 
-<td>{{dep.library_name}}</td>
+<td>
+{{dep.library_name}}
+</td>
 
 
-<td>{{dep.version}}</td>
-
-
-<td>{{dep.risk_score}}</td>
+<td>
+{{dep.version}}
+</td>
 
 
 <td>
 
+{{dep.risk_score}}
 
-<span class="badge bg-danger">
+<div class="progress mt-2" style="height:8px;">
 
-CRITICAL
+<div class="progress-bar bg-danger risk-bar"
+style="width: {{ (dep.risk_score / 300) * 100 }}%;">
 
-</span>
+</div>
 
+</div>
 
 </td>
 
 
 <td>
 
-{{dep.status}}
+{% if dep.risk_score >= 80 %}
+
+<span class="badge bg-danger">
+🔴 CRITICAL
+</span>
+
+
+{% elif dep.risk_score >= 50 %}
+
+<span class="badge bg-warning text-dark">
+🟠 HIGH
+</span>
+
+
+{% elif dep.risk_score >= 25 %}
+
+<span class="badge bg-info text-dark">
+🟡 MEDIUM
+</span>
+
+
+{% else %}
+
+<span class="badge bg-success">
+🟢 LOW
+</span>
+
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if dep.status == "RISKY" %}
+
+<span class="badge bg-danger">
+⚠ RISKY
+</span>
+
+{% else %}
+
+<span class="badge bg-success">
+✓ CLEAN
+</span>
+
+{% endif %}
 
 </td>
 
@@ -338,8 +464,6 @@ CRITICAL
 
 
 {% endfor %}
-
-
 
 </table>
 
