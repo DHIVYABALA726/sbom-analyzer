@@ -1,132 +1,62 @@
 {% extends "base.html" %}
 
-
 {% block content %}
 
-
-<div class="card p-4">
-
-
-<h1>
-🏢 Application Security Ranking
-</h1>
-
-
-<p class="text-muted">
-Applications are ranked based on cumulative software supply chain risk.
-</p>
-
-
-
-<table class="table table-bordered table-hover mt-4">
-
-
-<thead class="table-dark">
-
-<tr>
-
-<th>Rank</th>
-
-<th>Application</th>
-
-<th>Total Risk Score</th>
-
-<th>Severity</th>
-
-<th>Action</th>
-
-</tr>
-
-</thead>
-
-
-
-<tbody>
-
-
-{% for app in applications %}
-
-
-<tr>
-
-
-<td>
-
-{{ loop.index }}
-
-</td>
-
-
-
-<td>
-
-{{ app.name }}
-
-</td>
-
-
-
-<td>
-
-{{ app.score }}
-
-</td>
-
-
-
-<td>
-
-
-{% if app.severity == "CRITICAL" %}
-
-<span class="badge bg-danger">
-
-{{ app.severity }}
-
-</span>
-
-
-{% else %}
-
-<span class="badge bg-warning">
-
-{{ app.severity }}
-
-</span>
-
-
-{% endif %}
-
-
-</td>
-
-
-
-<td>
-
-<a href="/dependencies" class="btn btn-outline-danger btn-sm">
-    Review Dependencies
-</a>
-
-</td>
-
-
-
-</tr>
-
-
-{% endfor %}
-
-
-
-</tbody>
-
-
-</table>
-
-
+<div class="page-header fade-in-up">
+    <h1 class="gradient-text">🏢 Application Security Ranking</h1>
+    <p class="text-muted">Applications are ranked based on cumulative software supply chain risk.</p>
 </div>
 
+<div class="card p-4 fade-in-up" style="animation-delay:0.1s">
 
+    <table class="table table-bordered table-hover table-modern mt-2" id="appTable">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Rank</th>
+                <th>Application</th>
+                <th>Total Risk Score</th>
+                <th>Severity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for app in applications %}
+            <tr class="row-anim" style="animation-delay:{{ loop.index0 * 0.05 }}s">
+
+                <td><span class="rank-pill">#{{ loop.index }}</span></td>
+
+                <td>{{ app.name }}</td>
+
+                <td>
+                    <div class="score-bar-wrap">
+                        <span class="score-num">{{ app.score }}</span>
+                        <div class="score-bar">
+                            <div class="score-bar-fill" style="width:{{ app.score }}%"></div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    {% if app.severity == "CRITICAL" %}
+                        <span class="badge bg-danger badge-glow">{{ app.severity }}</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark badge-glow">{{ app.severity }}</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a href="/dependencies" class="btn btn-outline-danger btn-sm btn-glow">
+                        Review Dependencies
+                    </a>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
 
 {% endblock %}

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="text-center mb-4 fade-in-up">
+  <h1 class="fw-bold display-5 gradient-text">🕸️ Dependency Graph</h1>
+  <p class="text-muted fs-5">
+    🔵 Application &nbsp;&nbsp; 🔴 Risky Library &nbsp;&nbsp; 🟢 Clean Library
+  </p>
+</div>
+
+<div class="card p-3 mb-4 fade-in-up" style="animation-delay:0.1s">
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <label class="fw-bold mb-2">💥 Simulate a New CVE</label>
+      <select id="librarySelect" class="form-select dark-select">
+        <option value="">-- Select a library --</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-danger btn-glow w-100 mt-4" onclick="simulateCVE()">🚨 Simulate Incident</button>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3 fade-in-up" style="animation-delay:0.2s">
+  <div id="network" style="width:100%; height:75vh; background:#0b1120; border-radius:12px;"></div>
+</div>
+
+<div id="impactPanel" class="impact-panel">
+  <h4 class="gradient-text">🚨 Incident Impact</h4>
+  <div id="impactContent" style="margin-top:20px;"></div>
+  <button class="btn btn-outline-light btn-sm btn-glow mt-4" onclick="closeImpactPanel()">Close ✕</button>
+</div>
+
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+  let network, nodesDataset, edgesDataset, graphRaw;
+  let pulseInterval = null;
+
+  fetch("/api/graph-data")
+    .then(res => res.json())
+    .then(data => {
+      graphRaw = data;
+      const container = document.getElementById("network");
+      nodesDataset = new vis.DataSet(data.nodes);
+      edgesDataset = new vis.DataSet(data.edges);
+
+      network = new vis.Network(container, { nodes: nodesDataset, edges: edgesDataset }, {
+        nodes: {
+          font: { color: "#e2e8f0", size: 14 },
+          borderWidth: 2,
+          shadow: { enabled: true, color: "rgba(0,0,0,0.4)", size: 8 }
+        },
+        edges: {
+          color: { color: "#334155", highlight: "#f97316" },
+          smooth: true,
+          width: 1.5
+        },
+        physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000 } },
+        interaction: { hover: true }
+      });
+
+      const libs = new Set();
+      data.nodes.forEach(n => { if (n.shape !== "box") libs.add(n.label); });
+      const sortedLibs = Array.from(libs).sort();
+      const select = document.getElementById("librarySelect");
+      sortedLibs.forEach(lib => {
+        const opt = document.createElement("option");
+        opt.value = lib;
+        opt.textContent = lib;
+        select.appendChild(opt);
+      });
+    })
+    .catch(err => {
+      document.getElementById("network").innerHTML =
+        "<p class='text-danger text-center pt-5'>Graph data load failed: " + err + "</p>";
+    });
+
+  function resetGraphColors() {
+    if (!graphRaw) return;
+    if (pulseInterval) { clearInterval(pulseInterval); pulseInterval = null; }
+    nodesDataset.update(graphRaw.nodes.map(n => ({ id: n.id, color: n.color, borderWidth: 2, size: undefined })));
+    edgesDataset.update(graphRaw.edges.map((e, i) => ({ id: e.id !== undefined ? e.id : i, color: { color: "#334155", highlight: "#f97316" }, width: 1.5 })));
+  }
+
+  // Pulse the vulnerable source node — grows/shrinks in a loop until reset
+  function startPulse(nodeId) {
+    let growing = true;
+    let size = 25;
+    pulseInterval = setInterval(() => {
+      size += growing ? 3 : -3;
+      if (size >= 40) growing = false;
+      if (size <= 25) growing = true;
+      nodesDataset.update({ id: nodeId, color: "#dc2626", borderWidth: 5, size: size });
+    }, 120);
+  }
+
+  function shockwaveHighlight(libraryName, affectedAppNames) {
+    resetGraphColors();
+
+    const libNode = graphRaw.nodes.find(n => n.label === libraryName && n.shape !== "box");
+    if (!libNode) return;
+
+    // pulse the source (vulnerable) node continuously
+    startPulse(libNode.id);
+
+    // light up each affected app node + the connecting edge, in sequence (the "shockwave")
+    affectedAppNames.forEach((appName, i) => {
+      setTimeout(() => {
+        nodesDataset.update({ id: appName, color: "#f97316", borderWidth: 5 });
+
+        const edge = graphRaw.edges.find(e =>
+          (e.from === libNode.id && e.to === appName) ||
+          (e.from === appName && e.to === libNode.id)
+        );
+        if (edge) {
+          edgesDataset.getIds().forEach(eid => {
+            const e = edgesDataset.get(eid);
+            if ((e.from === libNode.id && e.to === appName) || (e.from === appName && e.to === libNode.id)) {
+              edgesDataset.update({ id: eid, color: { color: "#f97316" }, width: 4 });
+            }
+          });
+        }
+      }, 250 * (i + 1));
+    });
+  }
+
+  function simulateCVE() {
+    const lib = document.getElementById("librarySelect").value;
+    if (!lib) return;
+
+    fetch(`/api/simulate-cve/${encodeURIComponent(lib)}`)
+      .then(res => res.json())
+      .then(data => {
+        let html = `
+          <p><strong>Library:</strong> ${data.library}</p>
+          <p><strong>Apps Affected:</strong> ${data.total_affected}</p>
+          <p><strong>Est. Remediation:</strong> ${data.estimated_remediation_hours} hrs</p>
+          <hr style="border-color:#374151;">
+        `;
+
+        if (data.affected_apps.length === 0) {
+          html += `<p style="color:#9ca3af;">No applications currently affected by this library.</p>`;
+        }
+
+        data.affected_apps.forEach((a, i) => {
+          html += `
+            <div class="impact-row" style="animation-delay:${i * 0.08}s;">
+              <strong>${a.app_name}</strong><br>
+              <small>${a.library_name} @ ${a.version} &mdash; Score: ${a.risk_score}</small>
+            </div>
+          `;
+        });
+
+        document.getElementById("impactContent").innerHTML = html;
+        document.getElementById("impactPanel").classList.add("open");
+
+        shockwaveHighlight(lib, data.affected_apps.map(a => a.app_name));
+      });
+  }
+
+  function closeImpactPanel() {
+    document.getElementById("impactPanel").classList.remove("open");
+    resetGraphColors();
+  }
+</script>
+
+{% endblock %}

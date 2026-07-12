@@ -2,91 +2,61 @@
 
 {% block content %}
 
-<div class="card p-4">
-
-    <h2>📦 Dependency Explorer</h2>
-
+<div class="page-header fade-in-up">
+    <h2 class="gradient-text">📦 Dependency Explorer</h2>
     <p class="text-muted">
         View and analyze all high-risk software dependencies across applications.
     </p>
+</div>
+
+<div class="card p-4 fade-in-up" style="animation-delay:0.1s">
 
     <input
         type="text"
         id="searchInput"
-        class="form-control mb-4"
-        placeholder="Search by application or library..."
+        class="form-control search-glow mb-4"
+        placeholder="🔍 Search by application or library..."
         onkeyup="searchTable()"
     >
 
-    <table class="table table-bordered table-hover" id="dependencyTable">
+    <table class="table table-bordered table-hover table-modern" id="dependencyTable">
 
         <thead class="table-dark">
-
             <tr>
-
                 <th>Application</th>
                 <th>Library</th>
                 <th>Version</th>
                 <th>Risk Score</th>
                 <th>Severity</th>
                 <th>Status</th>
-
             </tr>
-
         </thead>
 
         <tbody>
-
         {% for dep in dependencies %}
-
-            <tr>
+            <tr class="row-anim" style="animation-delay:{{ loop.index0 * 0.03 }}s">
 
                 <td>{{ dep.app_name }}</td>
-
                 <td>{{ dep.library_name }}</td>
-
                 <td>{{ dep.version }}</td>
-
                 <td>{{ dep.risk_score }}</td>
 
                 <td>
-
                     {% if dep.severity=="CRITICAL" %}
-
-                        <span class="badge bg-danger">
-                            CRITICAL
-                        </span>
-
+                        <span class="badge bg-danger badge-glow">CRITICAL</span>
                     {% elif dep.severity=="HIGH" %}
-
-                        <span class="badge bg-warning text-dark">
-                            HIGH
-                        </span>
-
+                        <span class="badge bg-warning text-dark badge-glow">HIGH</span>
                     {% else %}
-
-                        <span class="badge bg-success">
-                            MEDIUM
-                        </span>
-
+                        <span class="badge bg-success badge-glow">MEDIUM</span>
                     {% endif %}
-
                 </td>
 
                 <td>
-
-                    <span class="badge bg-danger">
-
-                        {{ dep.status|upper }}
-
-                    </span>
-
+                    <span class="badge bg-danger badge-glow">{{ dep.status|upper }}</span>
                 </td>
 
             </tr>
-
         {% endfor %}
-
         </tbody>
 
     </table>
@@ -94,49 +64,29 @@
 </div>
 
 <script>
-
 function searchTable(){
+    let input = document.getElementById("searchInput");
+    let filter = input.value.toUpperCase();
+    let table = document.getElementById("dependencyTable");
+    let tr = table.getElementsByTagName("tr");
 
-let input=document.getElementById("searchInput");
+    for (let i = 1; i < tr.length; i++) {
+        let td1 = tr[i].getElementsByTagName("td")[0];
+        let td2 = tr[i].getElementsByTagName("td")[1];
 
-let filter=input.value.toUpperCase();
+        if (td1 || td2) {
+            let txt1 = td1.textContent;
+            let txt2 = td2.textContent;
 
-let table=document.getElementById("dependencyTable");
-
-let tr=table.getElementsByTagName("tr");
-
-for(let i=1;i<tr.length;i++){
-
-let td1=tr[i].getElementsByTagName("td")[0];
-
-let td2=tr[i].getElementsByTagName("td")[1];
-
-if(td1||td2){
-
-let txt1=td1.textContent;
-
-let txt2=td2.textContent;
-
-if(txt1.toUpperCase().indexOf(filter)>-1 ||
-
-txt2.toUpperCase().indexOf(filter)>-1){
-
-tr[i].style.display="";
-
+            if (txt1.toUpperCase().indexOf(filter) > -1 ||
+                txt2.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
 }
-
-else{
-
-tr[i].style.display="none";
-
-}
-
-}
-
-}
-
-}
-
 </script>
 
 {% endblock %}

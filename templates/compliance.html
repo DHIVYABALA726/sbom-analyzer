@@ -2,98 +2,86 @@
 
 {% block content %}
 
-<div class="card p-4">
-
-    <h2>⚖ License Compliance Dashboard</h2>
-
+<div class="page-header fade-in-up">
+    <h2 class="gradient-text">⚖ License Compliance Dashboard</h2>
     <p class="text-muted">
         Monitor software license risks across applications and identify
         dependencies that may violate enterprise compliance policies.
     </p>
+</div>
 
-    <div class="row mt-4">
+<div class="row mt-4">
 
-        <div class="col-md-4">
-            <div class="card text-center bg-danger text-white">
-                <div class="card-body">
-                    <h5>Compliance Risks</h5>
-                    <h2>{{ summary.total_risky }}</h2>
-                </div>
+    <div class="col-md-4 fade-in-up" style="animation-delay:0.05s">
+        <div class="card stat-card text-center bg-danger text-white">
+            <div class="card-body">
+                <h5>Compliance Risks</h5>
+                <h2 class="counter">{{ summary.total_risky }}</h2>
             </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="card text-center bg-success text-white">
-                <div class="card-body">
-                    <h5>Compliant Dependencies</h5>
-                    <h2>{{ summary.total_clean }}</h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card text-center bg-primary text-white">
-                <div class="card-body">
-                    <h5>Total Dependencies</h5>
-                    <h2>{{ summary.total_dependencies }}</h2>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <hr class="my-4">
+    <div class="col-md-4 fade-in-up" style="animation-delay:0.15s">
+        <div class="card stat-card text-center bg-success text-white">
+            <div class="card-body">
+                <h5>Compliant Dependencies</h5>
+                <h2 class="counter">{{ summary.total_clean }}</h2>
+            </div>
+        </div>
+    </div>
 
-    <h4>Compliance Recommendations</h4>
+    <div class="col-md-4 fade-in-up" style="animation-delay:0.25s">
+        <div class="card stat-card text-center bg-primary text-white">
+            <div class="card-body">
+                <h5>Total Dependencies</h5>
+                <h2 class="counter">{{ summary.total_dependencies }}</h2>
+            </div>
+        </div>
+    </div>
 
-    <table class="table table-bordered table-hover mt-3">
+</div>
+
+<hr class="my-4">
+
+<div class="card p-4 fade-in-up" style="animation-delay:0.3s">
+
+    <h4 class="mb-3">Compliance Recommendations</h4>
+
+    <table class="table table-bordered table-hover table-modern mt-3">
 
         <thead class="table-dark">
-
             <tr>
                 <th>Application</th>
                 <th>Library</th>
                 <th>Severity</th>
                 <th>Recommendation</th>
             </tr>
-
         </thead>
 
         <tbody>
-
         {% for dep in dependencies %}
-
-            <tr>
+            <tr class="row-anim" style="animation-delay:{{ loop.index0 * 0.04 }}s">
 
                 <td>{{ dep.app_name }}</td>
 
                 <td>{{ dep.library_name }}</td>
 
                 <td>
-
                     {% if dep.severity == "CRITICAL" %}
-                        <span class="badge bg-danger">CRITICAL</span>
-
+                        <span class="badge bg-danger badge-glow">CRITICAL</span>
                     {% elif dep.severity == "HIGH" %}
-                        <span class="badge bg-warning text-dark">HIGH</span>
-
+                        <span class="badge bg-warning text-dark badge-glow">HIGH</span>
                     {% else %}
-                        <span class="badge bg-success">MEDIUM</span>
-
+                        <span class="badge bg-success badge-glow">MEDIUM</span>
                     {% endif %}
-
                 </td>
 
-                <td>
-
+                <td class="text-muted">
                     Review dependency license before production deployment.
-
                 </td>
 
             </tr>
-
         {% endfor %}
-
         </tbody>
 
     </table>

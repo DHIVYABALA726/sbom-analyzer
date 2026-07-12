@@ -1,0 +1,314 @@
+/* ============================================================
+   CYBER SLATE THEME — Full style.css replacement
+   Dark navy base + cyan/violet/pink gradient accents
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle at 10% 0%, #131c31 0%, #0b1120 45%, #070b16 100%);
+    color: #e2e8f0;
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+/* ---------- Navbar / Sidebar (generic Bootstrap) ---------- */
+.navbar, .sidebar {
+    background: #0d1425 !important;
+    border-bottom: 1px solid rgba(148,163,184,0.12);
+}
+
+.navbar-brand, .sidebar-brand {
+    font-weight: 800;
+    background: linear-gradient(90deg,#22d3ee,#8b5cf6,#ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nav-link {
+    color: #94a3b8 !important;
+    transition: color 0.2s ease, background 0.2s ease;
+    border-radius: 8px;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #fff !important;
+    background: rgba(139,92,246,0.15);
+}
+
+/* ---------- Page header / gradient title ---------- */
+.gradient-text {
+    background: linear-gradient(90deg,#22d3ee,#8b5cf6,#ec4899,#22d3ee);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s linear infinite;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 300% center; }
+}
+
+.page-header { margin-bottom: 22px; }
+.text-muted { color: #94a3b8 !important; }
+
+/* ---------- Cards: blend fully with page background (no box look) ---------- */
+.card {
+    background: transparent !important;
+    backdrop-filter: none;
+    border: none;
+    border-radius: 16px;
+    color: #e2e8f0;
+    box-shadow: none !important;
+}
+
+.card h1, .card h2, .card h3, .card h4, .card h5, .card h6 {
+    color: #f1f5f9;
+}
+
+/* Colored stat cards override with gradient backgrounds instead of flat bootstrap colors */
+.stat-card.bg-primary {
+    background: linear-gradient(135deg,#0ea5e9,#6366f1) !important;
+    border: none;
+}
+.stat-card.bg-success {
+    background: linear-gradient(135deg,#16a34a,#22c55e) !important;
+    border: none;
+}
+.stat-card.bg-danger {
+    background: linear-gradient(135deg,#dc2626,#ef4444) !important;
+    border: none;
+}
+.stat-card.bg-warning {
+    background: linear-gradient(135deg,#f59e0b,#fbbf24) !important;
+    border: none;
+    color: #1e293b !important;
+}
+.stat-card.bg-info {
+    background: linear-gradient(135deg,#0891b2,#22d3ee) !important;
+    border: none;
+    color: #08131f !important;
+}
+
+.stat-card {
+    border-radius: 16px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 14px 34px rgba(0,0,0,0.45);
+}
+
+.counter {
+    animation: countPop 0.5s ease;
+}
+
+@keyframes countPop {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Entrance animation ---------- */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Tables ---------- */
+.table {
+    color: #e2e8f0;
+}
+
+.table-modern, table {
+    background: transparent;
+}
+
+.table-dark th {
+    background: #0d1425 !important;
+    border-color: rgba(148,163,184,0.15) !important;
+    color: #cbd5e1;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+}
+
+.table td, .table th {
+    border-color: rgba(148,163,184,0.1) !important;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(139,92,246,0.12) !important;
+}
+
+.table-modern tbody tr.row-anim {
+    opacity: 0;
+    transform: translateX(-12px);
+    animation: rowSlideIn 0.4s ease forwards;
+}
+
+@keyframes rowSlideIn {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* ---------- Rank pill ---------- */
+.rank-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: linear-gradient(90deg,#22d3ee,#8b5cf6);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* ---------- Score bar ---------- */
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-num { font-weight: 700; min-width: 34px; color: #f1f5f9; }
+
+.score-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(148,163,184,0.15);
+    overflow: hidden;
+}
+
+.score-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg,#f97316,#ec4899);
+    animation: fillBar 0.8s ease forwards;
+}
+
+@keyframes fillBar {
+    from { width: 0 !important; }
+}
+
+/* ---------- Badges ---------- */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.bg-danger { background: linear-gradient(90deg,#dc2626,#ef4444) !important; }
+.bg-warning { background: linear-gradient(90deg,#f59e0b,#fbbf24) !important; color:#1e293b !important; }
+.bg-success { background: linear-gradient(90deg,#16a34a,#22c55e) !important; }
+.bg-primary { background: linear-gradient(90deg,#0ea5e9,#6366f1) !important; }
+.bg-info { background: linear-gradient(90deg,#0891b2,#22d3ee) !important; color:#08131f !important; }
+
+.badge-glow {
+    animation: badgePulse 2.2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.35); }
+    70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+/* ---------- Inputs / search ---------- */
+.form-control {
+    background: rgba(15,23,42,0.6);
+    border: 1px solid rgba(148,163,184,0.2);
+    color: #e2e8f0;
+    border-radius: 10px;
+}
+
+.form-control::placeholder { color: #64748b; }
+
+.form-control:focus {
+    background: rgba(15,23,42,0.8);
+    color: #fff;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139,92,246,0.2);
+}
+
+.search-glow:focus {
+    border-color: #22d3ee;
+    box-shadow: 0 0 0 4px rgba(34,211,238,0.2);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(90deg,#6366f1,#8b5cf6);
+    border: none;
+}
+
+.btn-outline-primary {
+    border-color: #6366f1;
+    color: #a5b4fc;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(90deg,#6366f1,#8b5cf6);
+    border-color: transparent;
+    color: #fff;
+}
+
+.btn-outline-danger {
+    border-color: #ef4444;
+    color: #fca5a5;
+}
+
+.btn-outline-danger:hover {
+    background: linear-gradient(90deg,#dc2626,#ef4444);
+    border-color: transparent;
+    color: #fff;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(139,92,246,0.35);
+}
+
+.btn-glow:active {
+    transform: translateY(0px) scale(0.97);
+}
+
+/* ---------- Recommendation list ---------- */
+.reco-list .list-group-item {
+    background: rgba(34,197,94,0.08);
+    border: none;
+    border-left: 4px solid #22c55e;
+    color: #e2e8f0;
+    margin-bottom: 6px;
+    border-radius: 8px;
+}
+
+.list-group-item {
+    background: rgba(30,41,59,0.6);
+    color: #e2e8f0;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0b1120; }
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,#22d3ee,#8b5cf6);
+    border-radius: 999px;
+}
+
+/* ---------- Chart cards ---------- */
+canvas { max-height: 320px; }
