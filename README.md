@@ -1,7 +1,7 @@
-# 🚀 SBOM Risk Scorer
+# SBOM Risk Scorer
 ## Software Supply Chain Security Analyzer
 
-## 📌 Project Overview
+## Project Overview
 
 SBOM Risk Scorer is an enterprise security platform that analyzes Software Bill of Materials (SBOM) data to identify vulnerable dependencies, calculate risk scores, monitor compliance risks, and generate security insights.
 
@@ -9,7 +9,7 @@ The platform helps security teams gain visibility into software components and p
 
 ---
 
-# 🎯 Problem Statement
+#  Problem Statement
 
 Modern applications depend on hundreds of open-source libraries. Vulnerable, outdated, or non-compliant dependencies can introduce software supply chain attacks and security risks.
 
@@ -23,7 +23,7 @@ Organizations need a solution to:
 
 ---
 
-# 💡 Solution
+#  Solution
 
 SBOM Risk Scorer provides automated software supply chain analysis through:
 
@@ -36,7 +36,7 @@ SBOM Risk Scorer provides automated software supply chain analysis through:
 
 ---
 
-# ✨ Features
+#  Features
 
 ## 📊 Security Dashboard
 - Total applications overview
