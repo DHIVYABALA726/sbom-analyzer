@@ -2,7 +2,7 @@
 
 **🔗 Live Demo:** [https://sbom-analyzer.onrender.com/](https://sbom-analyzer.onrender.com/)
 
-> ⚠️ Hosted on Render's free tier — if the app has been idle, the first load may take 30–50 seconds to wake up.
+
 
 A live risk-visibility and incident-response simulation tool for enterprise software supply chains — built for the Societe Generale Hackathon 2026 (Track: Third-Party & Software Risk).
 
