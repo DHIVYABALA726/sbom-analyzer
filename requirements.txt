@@ -101,3 +101,6 @@ uvicorn==0.44.0
 watchdog==6.0.0
 Werkzeug==3.1.8
 wrapt==1.14.2
+Flask==3.0.3
+reportlab==4.2.2
+gunicorn==22.0.0
